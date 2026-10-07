@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# PhantomX generated outputs — never commit scan results
+reports/*.html
+reports/*.json
+reports/*.txt
+reports/*.md
+reports/.last_session.json
+/tmp/phantomx*
+*.pcap
+*.pcapng
+*.hccapx
+*.hc22000
+
+# Sensitive files — NEVER commit
+*.key
+*.pem
+*.p12
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+*.keystore
+secrets.json
+.env
+config.local.*
+*.hashes
+*_hashes.txt
+shadow.txt
+
+# Test artifacts
+.coverage
+coverage.xml
+.pytest_cache/
+htmlcov/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/

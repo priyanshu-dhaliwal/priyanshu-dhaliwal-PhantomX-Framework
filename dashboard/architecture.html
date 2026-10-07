@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PhantomX — Architecture Diagram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&display=swap');
+  :root {
+    --bg:     #060810; --bg1: #0c0f1a; --bg2: #111420;
+    --border: #1e2338; --text: #cdd6f4; --dim: #6c7086;
+    --red:    #e63946; --green: #06d6a0; --blue: #118ab2;
+    --yellow: #ffd166; --purple: #7b2fff; --orange: #ff7f50;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    padding: 32px 24px 60px;
+  }
+  h1 {
+    font-family: var(--sans); font-size: 28px; font-weight: 800;
+    color: #fff; letter-spacing: 2px; margin-bottom: 4px; text-transform: uppercase;
+  }
+  .subtitle { color: var(--dim); font-size: 12px; letter-spacing: 1px; margin-bottom: 36px; }
+  .diagram-wrap {
+    width: 100%; overflow-x: auto;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--bg1);
+    padding: 24px;
+    margin-bottom: 40px;
+  }
+
+  /* ── Layer boxes ── */
+  .arch-layer {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .layer-label {
+    position: absolute;
+    top: -10px; left: 16px;
+    background: var(--bg1);
+    padding: 0 8px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .layer-cli   { border-color: var(--green);  }
+  .layer-cli   .layer-label  { color: var(--green);  }
+  .layer-core  { border-color: var(--blue);   }
+  .layer-core  .layer-label  { color: var(--blue);   }
+  .layer-plugin{ border-color: var(--purple); }
+  .layer-plugin .layer-label { color: var(--purple); }
+  .layer-util  { border-color: var(--yellow); }
+  .layer-util  .layer-label  { color: var(--yellow); }
+  .layer-out   { border-color: var(--orange); }
+  .layer-out   .layer-label  { color: var(--orange); }
+
+  /* ── Component pills ── */
+  .comp-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
+  .comp {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 140px;
+    transition: border-color .2s, box-shadow .2s;
+    cursor: default;
+  }
+  .comp:hover { border-color: var(--purple); box-shadow: 0 0 12px rgba(123,47,255,.2); }
+  .comp-name { color: #fff; font-weight: 700; font-size: 12px; }
+  .comp-desc { color: var(--dim); font-size: 10px; line-height: 1.5; }
+  .comp-tag  {
+    display: inline-block;
+    font-size: 9px; font-weight: 700;
+    padding: 2px 6px; border-radius: 3px;
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-top: 4px; align-self: flex-start;
+  }
+  .tag-py     { background: rgba(17,138,178,.2); color: var(--blue); border: 1px solid rgba(17,138,178,.3); }
+  .tag-html   { background: rgba(255,127,80,.2); color: var(--orange); border: 1px solid rgba(255,127,80,.3); }
+  .tag-sh     { background: rgba(6,214,160,.2);  color: var(--green);  border: 1px solid rgba(6,214,160,.3); }
+  .tag-json   { background: rgba(255,209,102,.2);color: var(--yellow); border: 1px solid rgba(255,209,102,.3); }
+  .tag-yaml   { background: rgba(123,47,255,.2); color: var(--purple); border: 1px solid rgba(123,47,255,.3); }
+
+  /* ── Arrow ── */
+  .arrow {
+    text-align: center;
+    color: var(--border);
+    font-size: 18px;
+    margin: 4px 0;
+    letter-spacing: 4px;
+  }
+
+  /* ── Data flow ── */
+  .flow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .flow-card {
+    background: var(--bg1);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+  }
+  .flow-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .flow-title.red    { color: var(--red);    }
+  .flow-title.green  { color: var(--green);  }
+  .flow-title.blue   { color: var(--blue);   }
+  .flow-title.yellow { color: var(--yellow); }
+  .flow-title.purple { color: var(--purple); }
+  .flow-list { list-style: none; }
+  .flow-list li {
+    color: var(--dim); font-size: 11px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(30,35,56,0.5);
+  }
+  .flow-list li:last-child { border-bottom: none; }
+  .flow-list li::before { content: '→ '; color: var(--border); }
+
+  /* ── Plugin categories ── */
+  .plugin-category { margin-bottom: 12px; }
+  .pcat-title {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pcat-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .pcat-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ppill {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .ppill:hover { border-color: var(--purple); }
+
+  /* ── Stats row ── */
+  .stats-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 32px; }
+  .stat-box {
+    background: var(--bg1);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 22px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: var(--sans); font-size: 32px; font-weight: 800;
+    display: block; line-height: 1;
+  }
+  .stat-lbl { font-size: 10px; color: var(--dim); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h1>PhantomX Architecture</h1>
+<p class="subtitle">Advanced Post-Exploitation & Security Assessment Framework — System Design Overview</p>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-box"><span class="stat-num" style="color:#7b2fff">22</span><div class="stat-lbl">Plugin Modules</div></div>
+  <div class="stat-box"><span class="stat-num" style="color:#06d6a0">32</span><div class="stat-lbl">Python Files</div></div>
+  <div class="stat-box"><span class="stat-num" style="color:#e63946">300+</span><div class="stat-lbl">CVE Rules</div></div>
+  <div class="stat-box"><span class="stat-num" style="color:#ffd166">5</span><div class="stat-lbl">Output Formats</div></div>
+  <div class="stat-box"><span class="stat-num" style="color:#118ab2">0</span><div class="stat-lbl">External Deps</div></div>
+</div>
+
+<div class="diagram-wrap">
+
+  <!-- Layer 1: Entry Points -->
+  <div class="arch-layer layer-cli">
+    <div class="layer-label">Entry Points / Interfaces</div>
+    <div class="comp-row">
+      <div class="comp">
+        <div class="comp-name">main.py</div>
+        <div class="comp-desc">Argparse CLI — 22 subcommands with full flag support</div>
+        <span class="comp-tag tag-py">Python CLI</span>
+      </div>
+      <div class="comp">
+        <div class="comp-name">tui.py</div>
+        <div class="comp-desc">Curses interactive terminal UI — arrow key navigation, live output</div>
+        <span class="comp-tag tag-py">Python TUI</span>
+      </div>
+      <div class="comp">
+        <div class="comp-name">autorun.sh</div>
+        <div class="comp-desc">Full automation pipeline — 11 phases, alert webhooks, cron scheduling</div>
+        <span class="comp-tag tag-sh">Bash</span>
+      </div>
+      <div class="comp">
+        <div class="comp-name">dashboard/index.html</div>
+        <div class="comp-desc">Interactive HTML5 dashboard — loads JSON report, risk viz, charts</div>
+        <span class="comp-tag tag-html">HTML/CSS/JS</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↕ ↕ ↕</div>
+
+  <!-- Layer 2: Core Engine -->
+  <div class="arch-layer layer-core">
+    <div class="layer-label">Core Engine</div>
+    <div class="comp-row">
+      <div class="comp">
+        <div class="comp-name">core/engine.py</div>
+        <div class="comp-desc">Dynamic plugin loader — imports modules at runtime by name from MODULE_MAP dict</div>
+        <span class="comp-tag tag-py">Plugin Engine</span>
+      </div>
+      <div class="comp">
+        <div class="comp-name">core/scoring.py</div>
+        <div class="comp-desc">CVSS-like risk scorer — 40+ rules, overall score, prioritised remediation</div>
+        <span class="comp-tag tag-py">Risk Engine</span>
+      </div>
+      <div class="comp">
+        <div class="comp-name">core/banner.py</div>
+        <div class="comp-desc">ANSI color output, tables, findings printer, section headers</div>
+        <span class="comp-tag tag-py">Output Layer</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↕ ↕ ↕</div>
+
+  <!-- Layer 3: Plugin Modules -->
+  <div class="arch-layer layer-plugin">
+    <div class="layer-label">Plugin Modules (22 total) — all implement run(args, verbose) → dict</div>
+
+    <div class="plugin-category">
+      <div class="pcat-title" style="color:#e63946">Reconnaissance & Discovery</div>
+      <div class="pcat-pills">
+        <div class="ppill">🗺️ recon</div>
+        <div class="ppill">🔍 enumeration</div>
+        <div class="ppill">📡 dnsrecon</div>
+        <div class="ppill">🌐 network</div>
+      </div>
+    </div>
+
+    <div class="plugin-category">
+      <div class="pcat-title" style="color:#ff7f50">Vulnerability Assessment</div>
+      <div class="pcat-pills">
+        <div class="ppill">🎯 vulnscan</div>
+        <div class="ppill">🔧 fuzzer</div>
+        <div class="ppill">🛡️ cvecheck</div>
+        <div class="ppill">🕸️ webapp</div>
+        <div class="ppill">🔌 apitesting</div>
+      </div>
+    </div>
+
+    <div class="plugin-category">
+      <div class="pcat-title" style="color:#ffd166">Privilege Escalation & Post-Exploitation</div>
+      <div class="pcat-pills">
+        <div class="ppill">⬆️ privesc</div>
+        <div class="ppill">💻 postexploit</div>
+        <div class="ppill">🔒 persistence</div>
+        <div class="ppill">💰 loot</div>
+      </div>
+    </div>
+
+    <div class="plugin-category">
+      <div class="pcat-title" style="color:#118ab2">Network & Protocol</div>
+      <div class="pcat-pills">
+        <div class="ppill">⚙️ services</div>
+        <div class="ppill">↔️ lateral</div>
+        <div class="ppill">📶 traffic</div>
+        <div class="ppill">👻 evasion</div>
+      </div>
+    </div>
+
+    <div class="plugin-category">
+      <div class="pcat-title" style="color:#7b2fff">Infrastructure & Identity</div>
+      <div class="pcat-pills">
+        <div class="ppill">🏢 activedir</div>
+        <div class="ppill">🐳 container</div>
+        <div class="ppill">📋 audit</div>
+        <div class="ppill">🔑 passattack</div>
+        <div class="ppill">📡 wireless</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↕ ↕ ↕</div>
+
+  <!-- Layer 4: Utils -->
+  <div class="arch-layer layer-util">
+    <div class="layer-label">Utilities</div>
+    <div class="comp-row">
+      <div class="comp">
+        <div class="comp-name">utils/shell.py</div>
+        <div class="comp-desc">Safe subprocess wrapper — timeout, error handling, file permissions, UID checks</div>
+        <span class="comp-tag tag-py">Shell Utils</span>
+      </div>
+      <div class="comp">
+        <div class="comp-name">utils/report.py</div>
+        <div class="comp-desc">Report generator — HTML (dark theme), JSON, plain text output</div>
+        <span class="comp-tag tag-py">Report Gen</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↕ ↕ ↕</div>
+
+  <!-- Layer 5: Output -->
+  <div class="arch-layer layer-out">
+    <div class="layer-label">Outputs</div>
+    <div class="comp-row">
+      <div class="comp">
+        <div class="comp-name">Session JSON</div>
+        <div class="comp-desc">reports/.last_session.json — persisted between runs, feeds dashboard</div>
+        <span class="comp-tag tag-json">JSON</span>
+      </div>
+      <div class="comp">
+        <div class="comp-name">HTML Report</div>
+        <div class="comp-desc">Dark-themed static HTML with CVE table, findings per module</div>
+        <span class="comp-tag tag-html">HTML</span>
+      </div>
+      <div class="comp">
+        <div class="comp-name">Risk Score JSON</div>
+        <div class="comp-desc">Scored findings with CVSS-like scores + remediation actions</div>
+        <span class="comp-tag tag-json">JSON</span>
+      </div>
+      <div class="comp">
+        <div class="comp-name">Dashboard</div>
+        <div class="comp-desc">Interactive HTML5 SPA — load JSON report to visualise</div>
+        <span class="comp-tag tag-html">HTML5</span>
+      </div>
+      <div class="comp">
+        <div class="comp-name">TXT Log</div>
+        <div class="comp-desc">Autorun timestamped log file with all module output</div>
+        <span class="comp-tag tag-json">TXT</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Data Flow -->
+<h2 style="font-family:var(--sans);font-size:16px;font-weight:800;color:#fff;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">Data Flow</h2>
+<div class="flow-grid">
+  <div class="flow-card">
+    <div class="flow-title red">1. Execution</div>
+    <ul class="flow-list">
+      <li>User invokes CLI or TUI</li>
+      <li>Argparse parses module name</li>
+      <li>Engine looks up MODULE_MAP</li>
+      <li>Plugin file imported dynamically</li>
+    </ul>
+  </div>
+  <div class="flow-card">
+    <div class="flow-title green">2. Discovery</div>
+    <ul class="flow-list">
+      <li>Plugin calls shell utils</li>
+      <li>Subprocess runs system tools</li>
+      <li>Results parsed via regex</li>
+      <li>Dict returned to engine</li>
+    </ul>
+  </div>
+  <div class="flow-card">
+    <div class="flow-title blue">3. Analysis</div>
+    <ul class="flow-list">
+      <li>Engine stores results in session</li>
+      <li>Scoring engine applies 40+ rules</li>
+      <li>CVSS-like scores assigned</li>
+      <li>Remediation actions mapped</li>
+    </ul>
+  </div>
+  <div class="flow-card">
+    <div class="flow-title yellow">4. Reporting</div>
+    <ul class="flow-list">
+      <li>Session JSON persisted to disk</li>
+      <li>Report generator invoked</li>
+      <li>HTML/JSON/TXT written</li>
+      <li>Dashboard loads JSON for viz</li>
+    </ul>
+  </div>
+  <div class="flow-card">
+    <div class="flow-title purple">5. Alerting</div>
+    <ul class="flow-list">
+      <li>autorun.sh parses session JSON</li>
+      <li>Critical findings extracted</li>
+      <li>Slack/Discord/Email alerts fired</li>
+      <li>Log file written for audit trail</li>
+    </ul>
+  </div>
+</div>
+
+<p style="color:var(--dim);font-size:11px;text-align:center;margin-top:32px">
+  PhantomX — For Authorized Security Assessment Only · Zero external Python dependencies (stdlib only)
+</p>
+</body>
+</html>

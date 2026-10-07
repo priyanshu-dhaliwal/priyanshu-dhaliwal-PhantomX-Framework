@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PhantomX — Complete Command Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
+:root{
+  --bg:#0a0c12;--bg1:#0f1118;--bg2:#14171f;--bg3:#1a1e28;
+  --bdr:#252a38;--acc:#e63946;--grn:#3fb950;--yel:#d29922;
+  --blu:#58a6ff;--pur:#bc8cff;--org:#f0883e;--dim:#8b949e;
+  --text:#e6edf3;--mid:#c9d1d9;
+  --mono:'JetBrains Mono',monospace;--disp:'Bebas Neue',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--mid);font-family:var(--mono);font-size:13px;line-height:1.6;}
+/* Layout */
+.wrap{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+/* Sidebar */
+.nav{background:var(--bg1);border-right:1px solid var(--bdr);
+  position:sticky;top:0;height:100vh;overflow-y:auto;padding-bottom:40px;}
+.nav-logo{padding:20px 18px 14px;border-bottom:1px solid var(--bdr);}
+.logo{font-family:var(--disp);font-size:28px;color:var(--acc);letter-spacing:2px;}
+.logo em{color:var(--text);font-style:normal;}
+.logo-sub{font-size:10px;color:var(--dim);letter-spacing:2px;margin-top:3px;}
+.search-box{margin:12px 14px;position:relative;}
+.search-inp{width:100%;background:var(--bg2);border:1px solid var(--bdr);
+  color:var(--text);font-family:var(--mono);font-size:12px;
+  padding:7px 10px 7px 28px;border-radius:4px;outline:none;}
+.search-inp:focus{border-color:var(--pur);}
+.s-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);
+  color:var(--dim);font-size:11px;pointer-events:none;}
+.nav-sec{padding:8px 14px 4px;font-size:9px;font-weight:700;
+  letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin-top:6px;}
+.nav-a{display:flex;align-items:center;gap:8px;padding:5px 18px;
+  color:var(--dim);text-decoration:none;font-size:12px;transition:all .1s;
+  border-left:2px solid transparent;}
+.nav-a:hover{color:var(--text);background:var(--bg2);}
+.nav-a.cur{color:var(--acc);border-left-color:var(--acc);background:rgba(230,57,70,.06);}
+.nb2{margin-left:auto;background:var(--bg3);border-radius:10px;
+  padding:1px 6px;font-size:9px;color:var(--dim);}
+/* Main */
+.main{padding:0 48px 100px;max-width:980px;}
+/* Hero */
+.hero{padding:40px 0 28px;border-bottom:1px solid var(--bdr);margin-bottom:40px;}
+.hero h1{font-family:var(--disp);font-size:clamp(44px,6vw,80px);
+  color:var(--text);line-height:.9;letter-spacing:2px;margin-bottom:14px;}
+.hero h1 span{color:var(--acc);}
+.hero p{font-size:14px;color:var(--dim);max-width:580px;line-height:1.7;}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+.badge{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600;letter-spacing:.5px;}
+.b-g{background:rgba(63,185,80,.12);color:var(--grn);border:1px solid rgba(63,185,80,.25);}
+.b-b{background:rgba(88,166,255,.1);color:var(--blu);border:1px solid rgba(88,166,255,.25);}
+.b-p{background:rgba(188,140,255,.1);color:var(--pur);border:1px solid rgba(188,140,255,.25);}
+.b-o{background:rgba(240,136,62,.1);color:var(--org);border:1px solid rgba(240,136,62,.25);}
+/* Alert */
+.alert{border:1px solid;border-radius:5px;padding:12px 14px;margin:14px 0;
+  font-size:12px;line-height:1.6;display:flex;gap:10px;}
+.a-warn{background:rgba(210,153,34,.07);border-color:rgba(210,153,34,.3);color:var(--yel);}
+.a-info{background:rgba(88,166,255,.07);border-color:rgba(88,166,255,.25);color:var(--blu);}
+.a-tip {background:rgba(63,185,80,.07); border-color:rgba(63,185,80,.22);  color:var(--grn);}
+.a-ico{font-size:15px;flex-shrink:0;}
+/* Section */
+.section{margin-bottom:52px;scroll-margin-top:16px;}
+.sec-title{font-family:var(--disp);font-size:24px;color:var(--text);
+  letter-spacing:2px;margin-bottom:18px;padding-bottom:10px;
+  border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;}
+.sec-title .ico{font-size:20px;}
+/* Steps */
+.step{background:var(--bg1);border:1px solid var(--bdr);
+  border-radius:6px;margin-bottom:14px;overflow:hidden;}
+.step-hdr{display:flex;align-items:center;gap:12px;padding:11px 16px;
+  background:var(--bg2);border-bottom:1px solid var(--bdr);}
+.step-num{width:24px;height:24px;border-radius:4px;background:var(--acc);
+  color:#fff;font-weight:700;font-size:11px;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;}
+.step-title{font-weight:700;color:var(--text);font-size:13px;}
+.step-body{padding:14px 16px;}
+.step-body p{color:var(--dim);font-size:12px;margin-bottom:10px;line-height:1.6;}
+/* Code blocks */
+pre,.cb{background:var(--bg2);border:1px solid var(--bdr);border-radius:5px;
+  padding:14px 16px;overflow-x:auto;font-size:12px;line-height:1.75;
+  margin:8px 0;position:relative;}
+code{background:var(--bg2);border:1px solid var(--bdr);padding:1px 6px;
+  border-radius:3px;font-size:11px;color:var(--grn);}
+.cmt{color:var(--dim);}
+.cmd{color:var(--grn);}
+.flg{color:var(--blu);}
+.val{color:var(--org);}
+.out{color:var(--yel);}
+.kw {color:var(--pur);}
+.cp{position:absolute;top:8px;right:10px;background:var(--bg3);
+  border:1px solid var(--bdr);color:var(--dim);font-family:var(--mono);
+  font-size:10px;padding:3px 8px;border-radius:3px;cursor:pointer;
+  transition:all .15s;}
+.cp:hover{border-color:var(--grn);color:var(--grn);}
+/* Tables */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px;}
+.tbl thead tr{background:var(--bg2);border-bottom:2px solid var(--bdr);}
+.tbl th{padding:9px 12px;text-align:left;font-size:10px;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--dim);font-weight:600;}
+.tbl td{padding:8px 12px;border-bottom:1px solid rgba(37,42,56,.7);vertical-align:top;}
+.tbl tr:hover td{background:rgba(20,23,31,.6);}
+.tbl td:first-child{color:var(--grn);font-weight:600;white-space:nowrap;}
+.tbl td:nth-child(2){color:var(--blu);}
+.tbl td:last-child{color:var(--dim);}
+/* Quick cards */
+.qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-top:14px;}
+.qcard{background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;padding:14px;}
+.qcard h4{font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;
+  padding-bottom:6px;border-bottom:1px solid var(--bdr);}
+.qi{font-size:11px;padding:3px 0;border-bottom:1px solid rgba(37,42,56,.5);}
+.qi:last-child{border:none;}
+.qc{color:var(--grn);display:block;margin-bottom:1px;}
+.qd{color:var(--dim);font-size:10px;}
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ── Sidebar ── -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="logo">PHANTOM<em>X</em></div>
+    <div class="logo-sub">Command Reference  v6.0</div>
+  </div>
+  <div class="search-box">
+    <span class="s-ico">🔍</span>
+    <input class="search-inp" id="srch" placeholder="Search commands..." oninput="doSearch()">
+  </div>
+  <div class="nav-sec">Deployment</div>
+  <a class="nav-a cur" href="#install">⚙️ Kali Installation</a>
+  <a class="nav-a" href="#verify">✅ Verify & Test</a>
+  <a class="nav-a" href="#interfaces">🖥️ 3 Interfaces</a>
+  <div class="nav-sec">All Modules</div>
+  <a class="nav-a" href="#all-modules">📋 Module Table <span class="nb2">22</span></a>
+  <a class="nav-a" href="#recon">🗺️ Recon & DNS</a>
+  <a class="nav-a" href="#vuln">🎯 Vulnerabilities</a>
+  <a class="nav-a" href="#privesc">⬆️ Priv-Esc</a>
+  <a class="nav-a" href="#network">🌐 Network</a>
+  <a class="nav-a" href="#ad">🏢 Active Directory</a>
+  <a class="nav-a" href="#web">🕸️ Web & API</a>
+  <a class="nav-a" href="#post">💻 Post-Exploit</a>
+  <div class="nav-sec">Power Features</div>
+  <a class="nav-a" href="#ai">✦ AI Analysis</a>
+  <a class="nav-a" href="#auto">🤖 Automation</a>
+  <a class="nav-a" href="#reports">📄 Reports</a>
+  <div class="nav-sec">Reference</div>
+  <a class="nav-a" href="#flags">🚩 Global Flags</a>
+  <a class="nav-a" href="#envvars">🌍 Env Variables</a>
+  <a class="nav-a" href="#examples">💡 Real Examples</a>
+</nav>
+
+<!-- ── Main ── -->
+<div class="main">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>PHANTOM<span>X</span><br>COMMAND<br>REFERENCE</h1>
+  <p>Complete step-by-step guide to deploying and running PhantomX on Kali Linux — every command, every flag, every example in one place.</p>
+  <div class="badges">
+    <span class="badge b-g">38 Python Files</span>
+    <span class="badge b-b">22 Modules</span>
+    <span class="badge b-p">62 Tests Passing</span>
+    <span class="badge b-o">0 External Deps</span>
+  </div>
+  <div class="alert a-warn" style="margin-top:20px">
+    <span class="a-ico">⚠️</span>
+    <span><strong>Authorized testing only.</strong> Always obtain explicit written permission before scanning any system. Unauthorized use is illegal under CFAA, Computer Misuse Act, and equivalent laws worldwide.</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ INSTALL -->
+<div class="section" id="install">
+  <div class="sec-title"><span class="ico">⚙️</span>Kali Linux Installation — Step by Step</div>
+
+  <div class="step">
+    <div class="step-hdr"><div class="step-num">1</div>
+      <div class="step-title">Extract PhantomX to your Desktop</div></div>
+    <div class="step-body">
+<pre><span class="cmd">cd ~/Desktop</span>
+<span class="cmd">unzip PhantomX_Framework.zip</span>
+<span class="cmd">cd PhantomX</span>
+<span class="cmd">ls</span>    <span class="cmt"># should show: main.py tui.py gui.py autorun.sh setup_kali.sh ...</span></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-hdr"><div class="step-num">2</div>
+      <div class="step-title">Run the automated setup script (installs all 40+ tools)</div></div>
+    <div class="step-body">
+      <p>Installs nmap, smbclient, ldap-utils, impacket, aircrack-ng, hashcat, responder, crackmapexec, wireshark, and 35+ more tools automatically. Takes 3–10 minutes.</p>
+<pre><span class="cmd">chmod +x setup_kali.sh</span>
+<span class="cmd">bash setup_kali.sh</span>
+
+<span class="cmt"># What it does:</span>
+<span class="cmt"># ✓ Checks Kali Linux + Python 3.8+</span>
+<span class="cmt"># ✓ Installs 40+ security packages via apt</span>
+<span class="cmt"># ✓ Decompresses rockyou.txt wordlist</span>
+<span class="cmt"># ✓ Creates global 'phantomx' command</span>
+<span class="cmt"># ✓ Adds shell aliases to ~/.bashrc</span></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-hdr"><div class="step-num">3</div>
+      <div class="step-title">Reload your shell and verify</div></div>
+    <div class="step-body">
+<pre><span class="cmd">source ~/.bashrc</span>      <span class="cmt"># or open a new terminal</span>
+
+<span class="cmd">python3 main.py --version</span>
+<span class="out">PhantomX v6.0</span>
+
+<span class="cmd">phantomx --version</span>   <span class="cmt"># works from anywhere after setup</span>
+<span class="out">PhantomX v6.0</span></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-hdr"><div class="step-num">4</div>
+      <div class="step-title">Run the test suite to confirm everything works</div></div>
+    <div class="step-body">
+<pre><span class="cmd">python3 -m unittest tests/test_phantomx.py -v 2>&amp;1 | tail -4</span>
+<span class="out">----------------------------------------------</span>
+<span class="out">Ran 62 tests in ~55s</span>
+<span class="out">OK</span></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ VERIFY -->
+<div class="section" id="verify">
+  <div class="sec-title"><span class="ico">✅</span>Verify Everything Works</div>
+  <div class="alert a-tip">
+    <span class="a-ico">💡</span>
+    <span>Always test on <code>127.0.0.1</code> (localhost) first — no authorization needed for your own machine.</span>
+  </div>
+<pre><span class="cmt"># ── Test 1: Local enumeration (no target needed) ─────────────────</span>
+<span class="cmd">python3 main.py enum</span>
+
+<span class="cmt"># ── Test 2: Local privilege escalation check ─────────────────────</span>
+<span class="cmd">python3 main.py privesc</span>
+
+<span class="cmt"># ── Test 3: Interactive wizard (asks you for target) ─────────────</span>
+<span class="cmd">python3 main.py</span>
+<span class="out"># → Wizard opens, asks: Target IP / hostname [127.0.0.1]:</span>
+
+<span class="cmt"># ── Test 4: TUI (wizard screen on startup) ───────────────────────</span>
+<span class="cmd">python3 tui.py</span>
+<span class="out"># → Full-screen target setup wizard appears first</span>
+
+<span class="cmt"># ── Test 5: Web GUI (startup dialog) ─────────────────────────────</span>
+<span class="cmd">python3 gui.py</span>
+<span class="out"># → Opens http://127.0.0.1:7331 with target dialog</span>
+
+<span class="cmt"># ── Test 6: Risk scoring ─────────────────────────────────────────</span>
+<span class="cmd">python3 main.py score</span>
+
+<span class="cmt"># ── Test 7: HTML report from last scan ───────────────────────────</span>
+<span class="cmd">python3 main.py report --format html --open</span>
+
+<span class="cmt"># ── Test 8: Open HTML help page ──────────────────────────────────</span>
+<span class="cmd">python3 main.py help</span>
+<span class="cmt"># or:</span>
+<span class="cmd">firefox dashboard/help.html</span>
+<span class="cmd">xdg-open dashboard/help.html</span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ INTERFACES -->
+<div class="section" id="interfaces">
+  <div class="sec-title"><span class="ico">🖥️</span>Three Interfaces — How to Open Each</div>
+  <div class="qgrid">
+    <div class="qcard">
+      <h4>1. CLI  python3 main.py</h4>
+      <div class="qi"><span class="qc">python3 main.py</span><span class="qd">No args → 5-step wizard asks for target</span></div>
+      <div class="qi"><span class="qc">python3 main.py privesc</span><span class="qd">Run one module directly</span></div>
+      <div class="qi"><span class="qc">python3 main.py all</span><span class="qd">Run all 22 modules (asks target if missing)</span></div>
+      <div class="qi"><span class="qc">python3 main.py score</span><span class="qd">Risk score all findings</span></div>
+      <div class="qi"><span class="qd" style="color:var(--grn)">Best for: scripting, automation, cron</span></div>
+    </div>
+    <div class="qcard">
+      <h4>2. TUI  python3 tui.py</h4>
+      <div class="qi"><span class="qc">python3 tui.py</span><span class="qd">Startup wizard → 3-panel terminal menu</span></div>
+      <div class="qi"><span class="qc">↑↓  or  j k</span><span class="qd">Navigate module list</span></div>
+      <div class="qi"><span class="qc">Enter</span><span class="qd">Run selected module</span></div>
+      <div class="qi"><span class="qc">t / d / h / s</span><span class="qd">Target / Domain / Help / Score</span></div>
+      <div class="qi"><span class="qd" style="color:var(--grn)">Best for: interactive hands-on testing</span></div>
+    </div>
+    <div class="qcard">
+      <h4>3. Web GUI  python3 gui.py</h4>
+      <div class="qi"><span class="qc">python3 gui.py</span><span class="qd">Startup dialog → http://127.0.0.1:7331</span></div>
+      <div class="qi"><span class="qc">python3 gui.py --port 8080</span><span class="qd">Custom port</span></div>
+      <div class="qi"><span class="qc">python3 gui.py --no-browser</span><span class="qd">Don't auto-open browser</span></div>
+      <div class="qi"><span class="qc">✦ AI Analyst tab</span><span class="qd">Chat, analyse, MITRE mapping</span></div>
+      <div class="qi"><span class="qd" style="color:var(--grn)">Best for: visual results, AI analysis</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ ALL MODULES -->
+<div class="section" id="all-modules">
+  <div class="sec-title"><span class="ico">📋</span>All 22 Modules — Complete Table</div>
+  <div class="alert a-info">
+    <span class="a-ico">ℹ️</span>
+    <span>Modules marked with a target flag prompt for IP/hostname automatically if <code>--target</code> is not supplied on the command line.</span>
+  </div>
+  <table class="tbl" id="mod-table">
+  <thead><tr><th>Module</th><th>Command</th><th>Description</th></tr></thead>
+  <tbody>
+  <tr><td>enum</td>       <td>python3 main.py enum</td>                         <td>OS, kernel, users, network, mounts, processes, services</td></tr>
+  <tr><td>privesc</td>    <td>python3 main.py privesc</td>                      <td>SUID/GTFOBins, sudo, cron, capabilities, kernel CVEs, groups</td></tr>
+  <tr><td>persist</td>    <td>python3 main.py persist</td>                      <td>Crontab, shell profiles, SSH keys, systemd units, LD_PRELOAD</td></tr>
+  <tr><td>loot</td>       <td>python3 main.py loot</td>                         <td>Credentials, SSH keys, cloud creds, browser stores, history</td></tr>
+  <tr><td>lateral</td>    <td>python3 main.py lateral</td>                      <td>ARP sweep, SSH discovery, NFS/SMB shares, trust relationships</td></tr>
+  <tr><td>network</td>    <td>python3 main.py network --target &lt;ip&gt;</td>      <td>Port scan (128 threads), banners, firewall, DNS, SNMP, IPv6</td></tr>
+  <tr><td>audit</td>      <td>python3 main.py audit</td>                        <td>Password policy, empty passwords, SSH hardening, AppArmor</td></tr>
+  <tr><td>container</td>  <td>python3 main.py container</td>                    <td>Docker socket, K8s service account, cloud metadata, namespaces</td></tr>
+  <tr><td>webapp</td>     <td>python3 main.py webapp --target &lt;ip&gt;</td>        <td>Headers, paths, cookies, CORS, SSL/TLS, info disclosure</td></tr>
+  <tr><td>vulnscan</td>   <td>python3 main.py vulnscan --target &lt;ip&gt;</td>      <td>OWASP CWE Top 25: SQLi, XSS, SSRF, XXE, SSTI, IDOR, RCE</td></tr>
+  <tr><td>fuzzer</td>     <td>python3 main.py fuzzer --target &lt;ip&gt;</td>        <td>Boundary, CRLF, null byte, format string, HPP, encoding bypass</td></tr>
+  <tr><td>cvecheck</td>   <td>python3 main.py cvecheck --target &lt;ip&gt;</td>      <td>300+ CVE rules across Apache, PHP, MySQL, Docker, nginx, kernel</td></tr>
+  <tr><td>recon</td>      <td>python3 main.py recon --domain &lt;domain&gt;</td>     <td>WHOIS, subdomain enum, WAF/CDN, cert transparency, vhost discovery</td></tr>
+  <tr><td>services</td>   <td>python3 main.py services --target &lt;ip&gt;</td>      <td>SMB (EternalBlue, signing), SNMP OID walk, NetBIOS, SSH algos, FTP</td></tr>
+  <tr><td>activedir</td>  <td>python3 main.py activedir --target &lt;ip&gt;</td>     <td>Users, Kerberoast, AS-REP, delegation, AD CS, LAPS, trusts, GPO</td></tr>
+  <tr><td>evasion</td>    <td>python3 main.py evasion --target &lt;ip&gt;</td>       <td>Firewall evasion, fragmentation, source port bypass, pivot guide</td></tr>
+  <tr><td>postexploit</td><td>python3 main.py postexploit</td>                  <td>Situational awareness, credential paths, LOtL binaries, PtH/PTT</td></tr>
+  <tr><td>apitesting</td> <td>python3 main.py apitesting --target &lt;ip&gt;</td>    <td>OWASP API Top 10, JWT alg:none, GraphQL introspection, BOLA</td></tr>
+  <tr><td>passattack</td> <td>python3 main.py passattack --target &lt;ip&gt;</td>    <td>Default creds (50+ vendors), lockout-aware spray, hash guide</td></tr>
+  <tr><td>wireless</td>   <td>python3 main.py wireless --interface wlan0</td>   <td>AP survey, WPA2/WPS, rogue AP, PMKID attack, probe requests</td></tr>
+  <tr><td>dnsrecon</td>   <td>python3 main.py dnsrecon --domain &lt;domain&gt;</td>  <td>AXFR+IXFR, PTR sweep, DNSSEC, open resolver, subdomain takeover</td></tr>
+  <tr><td>traffic</td>    <td>python3 main.py traffic --interface eth0</td>     <td>LLMNR/NBT-NS poisoning check, ARP spoofing, cleartext sniff</td></tr>
+  </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ RECON -->
+<div class="section" id="recon">
+  <div class="sec-title"><span class="ico">🗺️</span>Recon & DNS Commands</div>
+<pre><span class="cmt"># Passive + active reconnaissance</span>
+<span class="cmd">python3 main.py recon <span class="flg">--domain</span> <span class="val">target.com</span></span>
+<span class="cmd">python3 main.py recon <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--domain</span> <span class="val">corp.local</span></span>
+<span class="cmd">python3 main.py recon <span class="flg">--domain</span> <span class="val">target.com</span> <span class="flg">--passive-only</span></span>
+
+<span class="cmt"># Deep DNS security assessment</span>
+<span class="cmd">python3 main.py dnsrecon <span class="flg">--domain</span> <span class="val">target.com</span></span>             <span class="cmt"># zone transfer, DNSSEC, takeover</span>
+<span class="cmd">python3 main.py dnsrecon <span class="flg">--domain</span> <span class="val">target.com</span> <span class="flg">--ns</span> <span class="val">8.8.8.8</span></span>  <span class="cmt"># custom nameserver</span>
+<span class="cmd">python3 main.py dnsrecon <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>              <span class="cmt"># reverse DNS sweep of /24</span>
+
+<span class="cmt"># Network discovery</span>
+<span class="cmd">python3 main.py network <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+<span class="cmd">python3 main.py network <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--snmp</span></span>    <span class="cmt"># include SNMP probe</span>
+<span class="cmd">python3 main.py lateral</span>                              <span class="cmt"># ARP cache + SSH discovery</span>
+<span class="cmd">python3 main.py lateral <span class="flg">--arp-scan</span></span>                  <span class="cmt"># active /24 ping sweep</span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ VULN -->
+<div class="section" id="vuln">
+  <div class="sec-title"><span class="ico">🎯</span>Vulnerability Scanning Commands</div>
+<pre><span class="cmt"># OWASP CWE Top 25 — SQLi, XSS, SSRF, XXE, SSTI, IDOR, RCE...</span>
+<span class="cmd">python3 main.py vulnscan <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+<span class="cmd">python3 main.py vulnscan <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--port</span> <span class="val">443</span></span>  <span class="cmt"># HTTPS</span>
+<span class="cmd">python3 main.py vulnscan <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--cwe-ref</span></span>  <span class="cmt"># print CWE Top 25 table</span>
+
+<span class="cmt"># 300+ CVE banner matching</span>
+<span class="cmd">python3 main.py cvecheck <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+<span class="cmd">python3 main.py cvecheck <span class="flg">--local</span></span>                   <span class="cmt"># local packages only</span>
+
+<span class="cmt"># Web app scanner</span>
+<span class="cmd">python3 main.py webapp   <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+<span class="cmd">python3 main.py webapp   <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--port</span> <span class="val">8080</span></span>
+
+<span class="cmt"># Parameter + header fuzzer</span>
+<span class="cmd">python3 main.py fuzzer   <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+<span class="cmd">python3 main.py fuzzer   <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--deep</span></span>   <span class="cmt"># extended depth</span>
+
+<span class="cmt"># OWASP API Top 10 + JWT + GraphQL</span>
+<span class="cmd">python3 main.py apitesting <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+<span class="cmd">python3 main.py apitesting <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--jwt</span> <span class="flg">--graphql</span></span>
+
+<span class="cmt"># Security audit</span>
+<span class="cmd">python3 main.py audit</span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ PRIVESC -->
+<div class="section" id="privesc">
+  <div class="sec-title"><span class="ico">⬆️</span>Privilege Escalation Commands</div>
+<pre><span class="cmt"># SUID/GTFOBins, sudo, cron, capabilities, kernel CVEs</span>
+<span class="cmd">python3 main.py privesc</span>
+<span class="cmd">python3 main.py privesc <span class="flg">-v</span></span>                     <span class="cmt"># verbose — shows all SUID binaries</span>
+<span class="cmd">python3 main.py privesc <span class="flg">--output</span> <span class="val">html</span></span>           <span class="cmt"># save HTML report</span>
+
+<span class="cmt"># Persistence mechanisms audit</span>
+<span class="cmd">python3 main.py persist</span>
+<span class="cmd">python3 main.py persist <span class="flg">--list</span></span>                 <span class="cmt"># read-only audit</span>
+
+<span class="cmt"># Credential harvesting</span>
+<span class="cmd">python3 main.py loot</span>
+<span class="cmd">python3 main.py loot <span class="flg">--shadow</span> <span class="flg">--ssh</span> <span class="flg">--cloud</span></span>    <span class="cmt"># specific targets only</span>
+
+<span class="cmt"># Post-exploitation awareness</span>
+<span class="cmd">python3 main.py postexploit</span>                     <span class="cmt"># local system</span>
+<span class="cmd">python3 main.py postexploit <span class="flg">--target</span> <span class="val">10.10.10.5</span></span> <span class="cmt"># remote guidance</span>
+
+<span class="cmt"># Container / cloud escape</span>
+<span class="cmd">python3 main.py container</span>
+<span class="cmd">python3 main.py container <span class="flg">--docker</span> <span class="flg">--k8s</span></span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ NETWORK -->
+<div class="section" id="network">
+  <div class="sec-title"><span class="ico">🌐</span>Network & Protocol Commands</div>
+<pre><span class="cmt"># SMB — shares, EternalBlue, signing, RID cycling</span>
+<span class="cmd">python3 main.py services <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--smb</span></span>
+
+<span class="cmt"># SNMP — community brute-force, OID walk, users, processes</span>
+<span class="cmd">python3 main.py services <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--snmp</span></span>
+
+<span class="cmt"># SSH — version, weak algos, host keys, auth methods</span>
+<span class="cmd">python3 main.py services <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--ssh</span></span>
+
+<span class="cmt"># LDAP — anonymous bind, base DN, users, password policy</span>
+<span class="cmd">python3 main.py services <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--ldap</span></span>
+
+<span class="cmt"># FTP — anonymous login, bounce, vsftpd backdoor</span>
+<span class="cmd">python3 main.py services <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--ftp</span></span>
+
+<span class="cmt"># All services at once</span>
+<span class="cmd">python3 main.py services <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+
+<span class="cmt"># Traffic analysis — LLMNR, ARP, cleartext credentials (needs root)</span>
+<span class="cmd">sudo python3 main.py traffic <span class="flg">--interface</span> <span class="val">eth0</span></span>
+<span class="cmd">sudo python3 main.py traffic <span class="flg">--interface</span> <span class="val">eth0</span> <span class="flg">--duration</span> <span class="val">60</span></span>
+
+<span class="cmt"># Firewall evasion testing + pivot guide</span>
+<span class="cmd">python3 main.py evasion <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+<span class="cmd">python3 main.py evasion <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--fragment</span> <span class="flg">--egress</span></span>
+
+<span class="cmt"># Wireless — WPA2, WPS, rogue AP, PMKID (needs wireless interface)</span>
+<span class="cmd">python3 main.py wireless <span class="flg">--interface</span> <span class="val">wlan0</span></span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ AD -->
+<div class="section" id="ad">
+  <div class="sec-title"><span class="ico">🏢</span>Active Directory Commands</div>
+<pre><span class="cmt"># Basic AD enum (anonymous bind)</span>
+<span class="cmd">python3 main.py activedir <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--domain</span> <span class="val">corp.local</span></span>
+
+<span class="cmt"># Full AD enum with credentials</span>
+<span class="cmd">python3 main.py activedir     <span class="flg">--target</span>   <span class="val">10.10.10.5</span>     <span class="flg">--domain</span>   <span class="val">corp.local</span>     <span class="flg">--user</span>     <span class="val">jsmith</span>     <span class="flg">--password</span> <span class="val">Password123</span></span>
+
+<span class="cmt"># What gets checked:
+# ✓ Domain SID, functional level, machine account quota
+# ✓ All enabled users + never-expire accounts
+# ✓ Privileged groups (Domain Admins, Enterprise Admins)
+# ✓ Computer objects + legacy OS detection
+# ✓ Kerberoastable SPNs (attack hint included)
+# ✓ AS-REP roastable accounts (attack hint included)
+# ✓ Unconstrained + constrained delegation
+# ✓ AD CS / ESC1-ESC8 indicators
+# ✓ LAPS deployment status
+# ✓ Domain trust relationships
+# ✓ BloodHound collection commands</span>
+
+<span class="cmt"># Follow-up commands shown in PhantomX output:</span>
+<span class="cmd">impacket-GetUserSPNs corp.local/jsmith:Password123 <span class="flg">-dc-ip</span> 10.10.10.5 <span class="flg">-request</span></span>
+<span class="cmd">hashcat <span class="flg">-m</span> 13100 kerberoast.hashes /usr/share/wordlists/rockyou.txt</span>
+<span class="cmd">bloodhound-python <span class="flg">-u</span> jsmith <span class="flg">-p</span> Password123 <span class="flg">-d</span> corp.local <span class="flg">-ns</span> 10.10.10.5 <span class="flg">-c</span> All</span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ AI -->
+<div class="section" id="ai">
+  <div class="sec-title"><span class="ico">✦</span>AI Analysis Commands</div>
+  <div class="alert a-info">
+    <span class="a-ico">ℹ️</span>
+    <span>AI commands call the Anthropic Claude API. Run scan modules first so there is session data to analyse. The Web GUI (<code>python3 gui.py</code>) gives the best AI experience with a chat interface.</span>
+  </div>
+<pre><span class="cmt"># Run a scan first, then AI-analyse</span>
+<span class="cmd">python3 main.py privesc <span class="flg">--output</span> <span class="val">json</span></span>
+<span class="cmd">python3 main.py loot    <span class="flg">--output</span> <span class="val">json</span></span>
+
+<span class="cmt"># AI sub-commands</span>
+<span class="cmd">python3 main.py ai <span class="flg">--subcommand</span> <span class="val">analyse</span></span>    <span class="cmt"># explain findings + risk context</span>
+<span class="cmd">python3 main.py ai <span class="flg">--subcommand</span> <span class="val">chat</span></span>       <span class="cmt"># interactive Q&A about your scan</span>
+<span class="cmd">python3 main.py ai <span class="flg">--subcommand</span> <span class="val">report</span></span>     <span class="cmt"># AI executive summary (saved to reports/)</span>
+<span class="cmd">python3 main.py ai <span class="flg">--subcommand</span> <span class="val">mitre</span></span>      <span class="cmt"># map findings to MITRE ATT&amp;CK</span>
+<span class="cmd">python3 main.py ai <span class="flg">--subcommand</span> <span class="val">chain</span></span>      <span class="cmt"># most likely attack chain</span>
+<span class="cmd">python3 main.py ai <span class="flg">--subcommand</span> <span class="val">remediate</span></span>  <span class="cmt"># prioritised fix roadmap</span>
+
+<span class="cmt"># Recommended: use Web GUI for AI (better interface)</span>
+<span class="cmd">python3 gui.py</span>   <span class="cmt"># → click "✦ AI" tab</span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ AUTO -->
+<div class="section" id="auto">
+  <div class="sec-title"><span class="ico">🤖</span>Automation Commands</div>
+<pre><span class="cmt"># ── Run all 22 modules ────────────────────────────────────────────</span>
+<span class="cmd">python3 main.py all</span>                           <span class="cmt"># wizard asks for target</span>
+<span class="cmd">python3 main.py all <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--output</span> <span class="val">html</span></span>
+<span class="cmd">python3 main.py all <span class="flg">--skip</span> lateral wireless traffic</span>   <span class="cmt"># skip noisy modules</span>
+
+<span class="cmt"># ── autorun.sh — full pipeline with alerting ──────────────────────</span>
+<span class="cmd">bash autorun.sh</span>                               <span class="cmt"># prompts for target</span>
+<span class="cmd">bash autorun.sh <span class="val">10.10.10.5</span></span>                    <span class="cmt"># target specified</span>
+<span class="cmd">bash autorun.sh <span class="val">10.10.10.5</span> html</span>               <span class="cmt"># target + HTML report</span>
+<span class="cmd">bash autorun.sh <span class="val">10.10.10.5</span> json <span class="val">lateral,wireless</span></span>  <span class="cmt"># skip modules</span>
+
+<span class="cmt"># ── autorun.sh with alerting ──────────────────────────────────────</span>
+<span class="cmd">PHANTOMX_SLACK=<span class="val">"https://hooks.slack.com/services/xxx"</span> bash autorun.sh</span>
+<span class="cmd">PHANTOMX_DISCORD=<span class="val">"https://discord.com/api/webhooks/xxx"</span> bash autorun.sh</span>
+<span class="cmd">PHANTOMX_EMAIL=<span class="val">"you@example.com"</span> bash autorun.sh</span>
+<span class="cmd">PHANTOMX_VERBOSE=1 bash autorun.sh <span class="val">10.10.10.5</span></span>
+
+<span class="cmt"># ── Schedule daily cron ───────────────────────────────────────────</span>
+<span class="cmd">bash autorun.sh <span class="flg">--install-cron</span></span>               <span class="cmt"># runs at 02:00 daily</span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ REPORTS -->
+<div class="section" id="reports">
+  <div class="sec-title"><span class="ico">📄</span>Reports & Scoring</div>
+<pre><span class="cmt"># Generate reports from last scan</span>
+<span class="cmd">python3 main.py report <span class="flg">--format</span> <span class="val">html</span></span>          <span class="cmt"># dark-theme HTML</span>
+<span class="cmd">python3 main.py report <span class="flg">--format</span> <span class="val">json</span></span>          <span class="cmt"># machine-readable</span>
+<span class="cmd">python3 main.py report <span class="flg">--format</span> <span class="val">txt</span></span>           <span class="cmt"># plain text</span>
+<span class="cmd">python3 main.py report <span class="flg">--format</span> <span class="val">html</span> <span class="flg">--open</span></span>   <span class="cmt"># generate + open in browser</span>
+
+<span class="cmt"># Risk scoring</span>
+<span class="cmd">python3 main.py score</span>                          <span class="cmt"># print scored findings table</span>
+<span class="cmd">python3 main.py score <span class="flg">--top</span> <span class="val">20</span></span>               <span class="cmt"># show top 20</span>
+<span class="cmd">python3 main.py score <span class="flg">--export</span> <span class="val">scored.json</span></span>   <span class="cmt"># save JSON</span>
+
+<span class="cmt"># Auto-save during any scan</span>
+<span class="cmd">python3 main.py privesc <span class="flg">--output</span> <span class="val">html</span></span>
+<span class="cmd">python3 main.py all     <span class="flg">--output</span> <span class="val">json</span></span>
+
+<span class="cmt"># Dashboard HTML pages (open in browser)</span>
+<span class="cmd">xdg-open dashboard/help.html</span>        <span class="cmt"># this command reference</span>
+<span class="cmd">xdg-open dashboard/index.html</span>       <span class="cmt"># visual JSON report loader</span>
+<span class="cmd">xdg-open dashboard/comparison.html</span>  <span class="cmt"># vs Metasploit, BloodHound...</span>
+<span class="cmd">xdg-open dashboard/architecture.html</span> <span class="cmt"># system design diagram</span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ FLAGS -->
+<div class="section" id="flags">
+  <div class="sec-title"><span class="ico">🚩</span>Global Flags</div>
+  <div class="alert a-tip">
+    <span class="a-ico">💡</span>
+    <span>Global flags must come <strong>BEFORE</strong> the module name: <code>python3 main.py --verbose privesc</code> ✓ &nbsp;|&nbsp; <code>python3 main.py privesc --verbose</code> ✗</span>
+  </div>
+  <table class="tbl">
+  <thead><tr><th>Flag</th><th>Values</th><th>Description</th></tr></thead>
+  <tbody>
+  <tr><td>--verbose / -v</td><td>flag</td><td>Enable detailed output — show more findings and raw data</td></tr>
+  <tr><td>--output / -o</td><td>html, json, txt</td><td>Auto-save report after module completes</td></tr>
+  <tr><td>--interactive / -i</td><td>flag</td><td>Force full 5-step wizard even if module is specified</td></tr>
+  <tr><td>--no-color</td><td>flag</td><td>Disable ANSI colours (useful for log files and pipes)</td></tr>
+  <tr><td>--version</td><td>flag</td><td>Print PhantomX version and exit</td></tr>
+  <tr><td>--help / -h</td><td>flag</td><td>Show usage for any command or module</td></tr>
+  <tr><td>--target</td><td>IP / hostname</td><td>Target for network modules — prompted if omitted</td></tr>
+  <tr><td>--domain</td><td>corp.local</td><td>Domain name for AD / DNS modules — prompted if omitted</td></tr>
+  <tr><td>--port</td><td>integer</td><td>Web port for webapp/vulnscan/fuzzer (default: 80)</td></tr>
+  </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ ENV VARS -->
+<div class="section" id="envvars">
+  <div class="sec-title"><span class="ico">🌍</span>Environment Variables</div>
+  <table class="tbl">
+  <thead><tr><th>Variable</th><th>Example</th><th>Effect</th></tr></thead>
+  <tbody>
+  <tr><td>PHANTOMX_VERBOSE</td><td>1</td><td>Verbose output in autorun.sh</td></tr>
+  <tr><td>PHANTOMX_OPEN</td><td>1</td><td>Auto-open HTML report after autorun.sh finishes</td></tr>
+  <tr><td>PHANTOMX_SLACK</td><td>https://hooks.slack.com/…</td><td>Slack webhook for critical finding alerts</td></tr>
+  <tr><td>PHANTOMX_DISCORD</td><td>https://discord.com/api/webhooks/…</td><td>Discord webhook for alerts</td></tr>
+  <tr><td>PHANTOMX_EMAIL</td><td>you@example.com</td><td>Email critical findings (requires mail)</td></tr>
+  <tr><td>NO_COLOR</td><td>1</td><td>Disable all ANSI colour output globally</td></tr>
+  </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ EXAMPLES -->
+<div class="section" id="examples">
+  <div class="sec-title"><span class="ico">💡</span>Real-World Authorized Assessment Examples</div>
+
+  <div class="step">
+    <div class="step-hdr"><div class="step-num">A</div>
+      <div class="step-title">Local Linux privilege escalation audit (your own machine)</div></div>
+    <div class="step-body">
+<pre><span class="cmd">python3 main.py enum     <span class="flg">--output</span> <span class="val">json</span></span>
+<span class="cmd">python3 main.py privesc  <span class="flg">--output</span> <span class="val">html</span></span>
+<span class="cmd">python3 main.py persist</span>
+<span class="cmd">python3 main.py loot     <span class="flg">--output</span> <span class="val">html</span></span>
+<span class="cmd">python3 main.py audit</span>
+<span class="cmd">python3 main.py score</span>
+<span class="cmd">python3 main.py ai <span class="flg">--subcommand</span> <span class="val">remediate</span></span>
+<span class="cmd">python3 main.py report   <span class="flg">--format</span> <span class="val">html</span> <span class="flg">--open</span></span></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-hdr"><div class="step-num">B</div>
+      <div class="step-title">Web application security assessment</div></div>
+    <div class="step-body">
+<pre><span class="cmd">python3 main.py recon      <span class="flg">--domain</span> <span class="val">target.com</span></span>
+<span class="cmd">python3 main.py webapp     <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--port</span> <span class="val">443</span></span>
+<span class="cmd">python3 main.py vulnscan   <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--port</span> <span class="val">443</span></span>
+<span class="cmd">python3 main.py apitesting <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--port</span> <span class="val">443</span></span>
+<span class="cmd">python3 main.py fuzzer     <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--deep</span></span>
+<span class="cmd">python3 main.py cvecheck   <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+<span class="cmd">python3 main.py ai         <span class="flg">--subcommand</span> <span class="val">report</span></span></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-hdr"><div class="step-num">C</div>
+      <div class="step-title">Active Directory red team assessment</div></div>
+    <div class="step-body">
+<pre><span class="cmd">python3 main.py services  <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--smb</span> <span class="flg">--ldap</span></span>
+<span class="cmd">python3 main.py activedir <span class="flg">--target</span> <span class="val">10.10.10.5</span> <span class="flg">--domain</span> <span class="val">corp.local</span></span>
+<span class="cmd">python3 main.py evasion   <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+<span class="cmd">python3 main.py postexploit <span class="flg">--target</span> <span class="val">10.10.10.5</span></span>
+<span class="cmd">python3 main.py ai        <span class="flg">--subcommand</span> <span class="val">mitre</span></span>
+<span class="cmd">python3 main.py ai        <span class="flg">--subcommand</span> <span class="val">chain</span></span>
+<span class="cmd">python3 main.py report    <span class="flg">--format</span> <span class="val">html</span> <span class="flg">--open</span></span></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-hdr"><div class="step-num">D</div>
+      <div class="step-title">Full engagement — single command + AI report</div></div>
+    <div class="step-body">
+<pre><span class="cmt"># Runs all 22 modules, saves HTML report, opens browser</span>
+<span class="cmd">bash autorun.sh <span class="val">10.10.10.5</span> html</span>
+
+<span class="cmt"># Then AI analysis</span>
+<span class="cmd">python3 main.py ai <span class="flg">--subcommand</span> <span class="val">analyse</span></span>
+<span class="cmd">python3 main.py ai <span class="flg">--subcommand</span> <span class="val">report</span></span>
+
+<span class="cmt"># Review everything in GUI</span>
+<span class="cmd">python3 gui.py</span></pre>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /wrap -->
+
+<script>
+// Sidebar active highlight
+const secs=document.querySelectorAll('.section');
+const als=document.querySelectorAll('.nav-a');
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      als.forEach(a=>a.classList.remove('cur'));
+      const a=document.querySelector(`.nav-a[href="#${e.target.id}"]`);
+      if(a)a.classList.add('cur');
+    }
+  });
+},{rootMargin:'-20% 0px -70% 0px'});
+secs.forEach(s=>obs.observe(s));
+
+// Copy buttons
+document.querySelectorAll('pre').forEach(p=>{
+  const b=document.createElement('button');
+  b.className='cp';b.textContent='Copy';
+  b.onclick=()=>{
+    navigator.clipboard.writeText(p.textContent.replace(/Copy$/,'').trim());
+    b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',2000);
+  };
+  p.appendChild(b);
+});
+
+// Search
+function doSearch(){
+  const q=document.getElementById('srch').value.toLowerCase();
+  document.querySelectorAll('#mod-table tbody tr').forEach(r=>{
+    r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';
+  });
+  document.querySelectorAll('pre').forEach(p=>{
+    if(!q){p.style.display='';return;}
+    const sec=p.closest('.section');
+    if(sec&&sec.textContent.toLowerCase().includes(q))p.style.display='';
+    else if(!p.textContent.toLowerCase().includes(q))p.style.display='none';
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# PhantomX — Advanced Post-Exploitation Framework
+# Requirements: Python 3.8+ (no external pip dependencies — stdlib only)
+# Tested on: Kali Linux 2023+, Ubuntu 20.04+, Debian 11+
+#
+# Optional tools (auto-detected at runtime):
+#   fping      — faster ping sweep (apt install fping)
+#   smbclient  — SMB share enum (apt install smbclient)
+#   showmount  — NFS export enum (apt install nfs-common)
+#   getcap     — Linux capabilities (apt install libcap2-bin)
+#   netstat    — fallback port listing (apt install net-tools)

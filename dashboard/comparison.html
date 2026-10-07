@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhantomX vs Industry Tools — Comparison</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
+
+:root {
+  --ink:     #0a0a0a;
+  --paper:   #f0ede6;
+  --accent:  #e63030;
+  --green:   #1a7a1a;
+  --gold:    #b8860b;
+  --border:  #1a1a1a;
+  --mid:     #444;
+  --light:   #888;
+  --mono:    'IBM Plex Mono', monospace;
+  --display: 'Bebas Neue', sans-serif;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 0;
+}
+
+/* ── Halftone texture overlay ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, #0a0a0a08 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 40px 32px 80px; }
+
+/* ── MASTHEAD ── */
+.masthead {
+  border-top: 6px solid var(--border);
+  border-bottom: 3px solid var(--border);
+  padding: 20px 0 16px;
+  margin-bottom: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 16px;
+}
+.masthead-left h1 {
+  font-family: var(--display);
+  font-size: clamp(42px, 7vw, 88px);
+  line-height: 0.9;
+  letter-spacing: 2px;
+  color: var(--ink);
+}
+.masthead-left h1 span { color: var(--accent); }
+.masthead-sub {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-top: 6px;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
+.masthead-right {
+  text-align: right;
+  font-size: 11px;
+  color: var(--light);
+  line-height: 2;
+}
+.masthead-right strong { color: var(--ink); display: block; font-size: 22px; }
+
+/* ── LEGEND ── */
+.legend-bar {
+  display: flex;
+  gap: 0;
+  border: 2px solid var(--border);
+  margin: 20px 0 28px;
+  overflow: hidden;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  border-right: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  flex: 1;
+}
+.legend-item:last-child { border-right: none; }
+.leg-dot {
+  width: 14px; height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.leg-full    { background: var(--green); }
+.leg-partial { background: var(--gold); }
+.leg-no      { background: #ddd; border: 1px solid #bbb; }
+.leg-unique  { background: var(--accent); }
+
+/* ── SECTION HEADER ── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: -2px;
+}
+.section-head h2 {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: 2px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 6px 16px;
+}
+.section-head .section-desc {
+  font-size: 11px;
+  color: var(--mid);
+  padding: 0 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── MAIN TABLE ── */
+.compare-wrap {
+  overflow-x: auto;
+  border: 2px solid var(--border);
+  margin-bottom: 32px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+/* Column headers */
+thead tr.col-headers th {
+  padding: 10px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-bottom: 3px solid var(--border);
+  border-right: 1px solid #ccc;
+  text-align: center;
+  vertical-align: bottom;
+  line-height: 1.3;
+}
+thead tr.col-headers th:first-child {
+  text-align: left;
+  width: 220px;
+  background: var(--ink);
+  color: var(--paper);
+}
+thead tr.col-headers th.phantomx-col {
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+}
+thead tr.col-headers th .tool-type {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.7);
+  margin-top: 3px;
+}
+thead tr.col-headers th .tool-type-dark {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--light);
+  margin-top: 3px;
+}
+
+/* Category rows */
+tr.category-row td {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--display);
+  font-size: 15px;
+  letter-spacing: 2px;
+  padding: 6px 12px;
+  border-right: 1px solid #333;
+}
+
+/* Feature rows */
+tr.feature-row td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #e0ddd6;
+  vertical-align: middle;
+}
+tr.feature-row:hover td { background: rgba(0,0,0,0.03); }
+tr.feature-row td:first-child {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  border-right: 2px solid #bbb;
+}
+tr.feature-row td.feature-note {
+  font-size: 10px;
+  color: var(--light);
+  font-style: italic;
+}
+tr.feature-row td.phantomx-td {
+  background: rgba(230,48,48,0.04);
+  border-right: 2px solid rgba(230,48,48,0.2);
+}
+
+/* Cell indicators */
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.cell.full    { color: var(--green); }
+.cell.partial { color: var(--gold); }
+.cell.no      { color: #bbb; }
+.cell.unique  { color: var(--accent); font-weight: 700; }
+.cell-icon    { font-size: 14px; }
+
+/* Score row */
+tr.score-row td {
+  background: #f5f2eb;
+  border-top: 3px double var(--border);
+  border-bottom: 3px double var(--border);
+  padding: 10px 12px;
+  font-weight: 700;
+}
+tr.score-row td:first-child {
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+.score-bar-wrap {
+  display: flex; align-items: center; gap: 8px;
+}
+.score-bar {
+  flex: 1; height: 8px;
+  background: #ddd;
+  border: 1px solid #bbb;
+  border-radius: 0;
+  overflow: hidden;
+}
+.score-fill { height: 100%; }
+.score-num { font-size: 12px; min-width: 32px; text-align: right; }
+
+/* ── SUMMARY CARDS ── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.sum-card {
+  border: 2px solid var(--border);
+  padding: 0;
+  overflow: hidden;
+}
+.sum-card-head {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sum-card-head .tool-name {
+  font-family: var(--display);
+  font-size: 18px;
+  letter-spacing: 1px;
+  flex: 1;
+}
+.sum-card-head .tool-badge {
+  font-size: 9px;
+  background: rgba(255,255,255,0.15);
+  padding: 2px 6px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.sum-card-body { padding: 12px 14px; }
+.sum-card-body p {
+  font-size: 11px;
+  color: var(--mid);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+.sum-card-strengths { list-style: none; }
+.sum-card-strengths li {
+  font-size: 11px;
+  padding: 3px 0;
+  border-bottom: 1px dashed #ddd;
+  display: flex; gap: 6px;
+}
+.sum-card-strengths li:last-child { border-bottom: none; }
+.sum-card-strengths .plus  { color: var(--green); font-weight: 700; }
+.sum-card-strengths .minus { color: var(--accent); font-weight: 700; }
+
+/* ── POSITIONING STATEMENT ── */
+.positioning {
+  border: 3px solid var(--accent);
+  padding: 24px 28px;
+  margin-bottom: 32px;
+  position: relative;
+}
+.positioning::before {
+  content: 'POSITIONING';
+  position: absolute;
+  top: -10px; left: 20px;
+  background: var(--paper);
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--accent);
+}
+.positioning h3 {
+  font-family: var(--display);
+  font-size: 28px;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+.positioning p {
+  font-size: 13px;
+  color: var(--mid);
+  line-height: 1.8;
+  max-width: 800px;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 2px solid var(--border);
+  padding-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+footer p { font-size: 11px; color: var(--light); }
+.print-btn {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 8px 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .15s;
+}
+.print-btn:hover { background: var(--accent); }
+
+/* ── Animations ── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page { animation: slideIn .4s ease; }
+
+@media print {
+  body { background: white; }
+  body::before { display: none; }
+  .print-btn { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Masthead ── -->
+  <div class="masthead">
+    <div class="masthead-left">
+      <h1>PHANTOM<span>X</span></h1>
+      <div class="masthead-sub">vs Industry Tools — Feature Comparison Matrix</div>
+    </div>
+    <div class="masthead-right">
+      <strong id="date-stamp">—</strong>
+      Red Team Framework Analysis<br>
+      Authorized Assessment Use Only<br>
+      v6.0 · 22 Modules · 32 Files
+    </div>
+  </div>
+
+  <!-- ── Legend ── -->
+  <div class="legend-bar">
+    <div class="legend-item"><div class="leg-dot leg-full"></div> Full Support</div>
+    <div class="legend-item"><div class="leg-dot leg-partial"></div> Partial / Plugin</div>
+    <div class="legend-item"><div class="leg-dot leg-no"></div> Not Supported</div>
+    <div class="legend-item"><div class="leg-dot leg-unique"></div> PhantomX Unique</div>
+  </div>
+
+  <!-- ── Main Comparison Table ── -->
+  <div class="section-head">
+    <h2>FEATURE MATRIX</h2>
+    <span class="section-desc">10 Tools · 50+ Capabilities · Honest Assessment</span>
+  </div>
+
+  <div class="compare-wrap">
+    <table id="compare-table">
+      <thead>
+        <tr class="col-headers">
+          <th style="text-align:left">Capability</th>
+          <th class="phantomx-col">PhantomX<span class="tool-type">This Project</span></th>
+          <th>Metasploit<span class="tool-type-dark">Exploit FW</span></th>
+          <th>BloodHound<span class="tool-type-dark">AD Analysis</span></th>
+          <th>Nmap<span class="tool-type-dark">Port Scanner</span></th>
+          <th>Burp Suite<span class="tool-type-dark">Web Proxy</span></th>
+          <th>Nessus<span class="tool-type-dark">Vuln Scanner</span></th>
+          <th>Wireshark<span class="tool-type-dark">Packet Capture</span></th>
+          <th>Impacket<span class="tool-type-dark">Protocol FW</span></th>
+          <th>Enum4Linux<span class="tool-type-dark">SMB Enum</span></th>
+          <th>Nikto<span class="tool-type-dark">Web Scanner</span></th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- ── Summary Cards ── -->
+  <div class="section-head" style="margin-bottom:16px">
+    <h2>TOOL PROFILES</h2>
+    <span class="section-desc">Strengths &amp; Limitations per Tool</span>
+  </div>
+  <div class="summary-grid" id="summary-grid"></div>
+
+  <!-- ── Positioning ── -->
+  <div class="positioning">
+    <h3>WHERE PHANTOMX FITS</h3>
+    <p>
+      PhantomX occupies the <strong>unified assessment layer</strong> — the space between
+      single-purpose specialist tools. Where Metasploit requires expert knowledge of individual
+      exploits, Nmap requires post-processing, BloodHound requires a Windows agent, and
+      Burp Suite requires manual proxy configuration, PhantomX provides a
+      <strong>single Python CLI with zero external dependencies</strong> that covers
+      reconnaissance through post-exploitation in one coherent pipeline.
+      <br><br>
+      It is not a replacement for specialist tools on deep engagements — it is the
+      <strong>first-pass triage layer</strong> that identifies what specialist tools to
+      deploy next, generates risk-scored reports automatically, and runs on any Kali Linux
+      host with Python 3.8+.
+    </p>
+  </div>
+
+  <footer>
+    <p>PhantomX v6.0 · For Authorized Penetration Testing Only · Zero external Python dependencies</p>
+    <button class="print-btn" onclick="window.print()">⎙ Print / Export PDF</button>
+  </footer>
+</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
+// Columns: [PhantomX, Metasploit, BloodHound, Nmap, Burp, Nessus, Wireshark, Impacket, Enum4Linux, Nikto]
+// Values: 'full' | 'partial' | 'no' | 'unique'
+
+const ROWS = [
+  // ── RECONNAISSANCE ──────────────────────────────────────────────────────
+  { cat: "RECONNAISSANCE & DISCOVERY" },
+  { label:"TCP Port Scanning",           vals:["full","full","no","full","partial","full","no","partial","no","partial"] },
+  { label:"Service Version Detection",   vals:["full","full","no","full","partial","full","partial","partial","no","partial"] },
+  { label:"OS Fingerprinting",           vals:["partial","full","no","full","no","full","partial","no","no","no"] },
+  { label:"Subdomain Enumeration",       vals:["full","no","no","no","partial","partial","no","no","no","no"] },
+  { label:"DNS Zone Transfer",           vals:["full","no","no","no","no","partial","no","no","no","no"] },
+  { label:"Certificate Transparency",    vals:["unique","no","no","no","no","no","no","no","no","no"] },
+  { label:"WAF / CDN Detection",         vals:["full","no","no","partial","full","partial","no","no","no","full"] },
+  { label:"WHOIS / ASN Lookup",          vals:["full","no","no","no","no","partial","no","no","no","no"] },
+  { label:"Virtual Host Discovery",      vals:["full","no","no","no","partial","partial","no","no","no","partial"] },
+  { label:"Reverse DNS Sweep",           vals:["full","no","no","full","no","partial","no","no","no","no"] },
+  { label:"Google Dork Generation",      vals:["unique","no","no","no","no","no","no","no","no","no"] },
+
+  // ── VULNERABILITY SCANNING ───────────────────────────────────────────────
+  { cat: "VULNERABILITY SCANNING" },
+  { label:"OWASP CWE Top 25",            vals:["full","partial","no","no","full","full","no","no","no","partial"] },
+  { label:"SQL Injection Detection",     vals:["full","full","no","no","full","full","no","no","no","full"] },
+  { label:"XSS Detection",              vals:["full","partial","no","no","full","full","no","no","no","full"] },
+  { label:"Path Traversal",             vals:["full","full","no","no","full","full","no","no","no","partial"] },
+  { label:"SSRF Testing",               vals:["full","partial","no","no","full","partial","no","no","no","no"] },
+  { label:"XXE Injection",              vals:["full","no","no","no","full","partial","no","no","no","no"] },
+  { label:"SSTI Detection",             vals:["full","no","no","no","full","partial","no","no","no","no"] },
+  { label:"CVE Banner Matching (300+)", vals:["full","full","no","partial","no","full","no","no","no","partial"] },
+  { label:"CVSS-like Risk Scoring",     vals:["unique","no","no","no","no","full","no","no","no","no"] },
+
+  // ── WEB APPLICATION ──────────────────────────────────────────────────────
+  { cat: "WEB APPLICATION TESTING" },
+  { label:"Web Security Header Audit",  vals:["full","no","no","no","full","full","no","no","no","full"] },
+  { label:"Cookie Flag Analysis",       vals:["full","no","no","no","full","partial","no","no","no","partial"] },
+  { label:"CORS Misconfiguration",      vals:["full","no","no","no","full","partial","no","no","no","no"] },
+  { label:"JWT Security Testing",       vals:["full","no","no","no","partial","partial","no","no","no","no"] },
+  { label:"GraphQL Introspection",      vals:["full","no","no","no","partial","partial","no","no","no","no"] },
+  { label:"API Top 10 (OWASP 2023)",    vals:["full","partial","no","no","full","partial","no","no","no","no"] },
+  { label:"Parameter Fuzzing",          vals:["full","partial","no","no","full","partial","no","no","no","partial"] },
+  { label:"SSL/TLS Audit",              vals:["partial","partial","no","partial","full","full","no","no","no","partial"] },
+
+  // ── NETWORK PROTOCOLS ────────────────────────────────────────────────────
+  { cat: "NETWORK PROTOCOL ENUMERATION" },
+  { label:"SMB Share Enumeration",      vals:["full","full","no","partial","no","full","partial","full","full","no"] },
+  { label:"SMB Signing Check",          vals:["full","full","no","partial","no","partial","no","full","partial","no"] },
+  { label:"MS17-010 EternalBlue",       vals:["full","full","no","full","no","full","no","no","no","no"] },
+  { label:"SNMP Community Brute-force", vals:["full","full","no","partial","no","full","no","no","partial","no"] },
+  { label:"SNMP Full OID Walk",         vals:["full","partial","no","no","no","partial","no","no","partial","no"] },
+  { label:"LDAP Anonymous Bind",        vals:["full","full","no","no","no","full","no","full","full","no"] },
+  { label:"SSH Version & Algo Audit",   vals:["full","partial","no","partial","no","full","no","no","no","no"] },
+  { label:"FTP Anonymous / Bounce",     vals:["full","full","no","partial","no","full","no","no","no","no"] },
+  { label:"NetBIOS Name Table",         vals:["full","partial","no","no","no","partial","no","no","full","no"] },
+
+  // ── ACTIVE DIRECTORY ─────────────────────────────────────────────────────
+  { cat: "ACTIVE DIRECTORY ASSESSMENT" },
+  { label:"User / Group Enumeration",   vals:["full","partial","full","no","no","partial","no","full","full","no"] },
+  { label:"Kerberoastable Accounts",    vals:["full","partial","full","no","no","partial","no","full","no","no"] },
+  { label:"AS-REP Roasting",            vals:["full","partial","full","no","no","partial","no","full","no","no"] },
+  { label:"Delegation Misconfigs",      vals:["full","no","full","no","no","partial","no","partial","no","no"] },
+  { label:"AD CS / ESC Detection",      vals:["full","no","full","no","no","partial","no","partial","no","no"] },
+  { label:"LAPS Deployment Check",      vals:["full","no","full","no","no","no","no","no","no","no"] },
+  { label:"BloodHound Collection Hints",vals:["unique","no","full","no","no","no","no","no","no","no"] },
+  { label:"Domain Trust Mapping",       vals:["full","partial","full","no","no","partial","no","full","no","no"] },
+
+  // ── POST-EXPLOITATION ────────────────────────────────────────────────────
+  { cat: "POST-EXPLOITATION & PRIVESC" },
+  { label:"SUID/SGID GTFOBins Scan",    vals:["full","partial","no","no","no","partial","no","no","no","no"] },
+  { label:"Sudo Misconfiguration",      vals:["full","partial","no","no","no","partial","no","no","no","no"] },
+  { label:"Linux Capabilities Audit",   vals:["full","partial","no","no","no","partial","no","no","no","no"] },
+  { label:"Kernel CVE Suggestions",     vals:["full","full","no","no","no","full","no","no","no","no"] },
+  { label:"Writable Cron Jobs",         vals:["full","no","no","no","no","partial","no","no","no","no"] },
+  { label:"Docker / LXD Escape",        vals:["full","partial","no","no","no","partial","no","no","no","no"] },
+  { label:"Container Metadata Probe",   vals:["full","partial","no","no","no","partial","no","no","no","no"] },
+  { label:"Credential Harvesting",      vals:["full","full","no","no","no","partial","no","full","no","no"] },
+  { label:"Lateral Movement Guide",     vals:["unique","full","partial","no","no","no","no","full","no","no"] },
+
+  // ── NETWORK ANALYSIS ─────────────────────────────────────────────────────
+  { cat: "NETWORK ANALYSIS & EVASION" },
+  { label:"LLMNR/NBT-NS Poisoning Check",vals:["full","partial","no","no","no","partial","full","no","no","no"] },
+  { label:"ARP Spoofing Detection",     vals:["full","no","no","no","no","partial","full","no","no","no"] },
+  { label:"Cleartext Credential Sniff", vals:["full","no","no","no","no","partial","full","no","no","no"] },
+  { label:"Firewall Evasion Testing",   vals:["full","full","no","full","no","partial","no","no","no","no"] },
+  { label:"Pivot / Tunnel Guide",       vals:["unique","partial","no","no","no","no","no","partial","no","no"] },
+  { label:"DNS Security Assessment",    vals:["full","no","no","no","no","partial","no","no","no","no"] },
+  { label:"Wireless Security Audit",    vals:["full","partial","no","no","no","partial","partial","no","no","no"] },
+
+  // ── REPORTING & USABILITY ────────────────────────────────────────────────
+  { cat: "REPORTING & USABILITY" },
+  { label:"HTML / JSON / TXT Reports",  vals:["full","full","full","no","full","full","no","no","no","partial"] },
+  { label:"Interactive HTML Dashboard", vals:["unique","no","partial","no","partial","full","no","no","no","no"] },
+  { label:"CVSS-like Risk Scoring",     vals:["unique","no","no","no","no","full","no","no","no","no"] },
+  { label:"Zero External Python Deps",  vals:["unique","no","no","no","no","no","no","no","no","no"] },
+  { label:"Single-Command Full Scan",   vals:["full","partial","no","no","no","full","no","no","no","no"] },
+  { label:"Automated Pipeline (Cron)",  vals:["full","partial","no","no","no","full","no","no","no","no"] },
+  { label:"Slack / Discord Alerting",   vals:["unique","no","no","no","no","partial","no","no","no","no"] },
+  { label:"Interactive TUI",            vals:["full","full","no","no","no","full","full","no","no","no"] },
+  { label:"Web-based GUI",              vals:["full","partial","full","no","full","full","no","no","no","no"] },
+  { label:"CI/CD Test Suite",           vals:["unique","no","no","no","no","no","no","no","no","no"] },
+];
+
+const TOOLS = [
+  "PhantomX","Metasploit","BloodHound","Nmap",
+  "Burp Suite","Nessus","Wireshark","Impacket","Enum4Linux","Nikto"
+];
+
+const TOOL_INFO = {
+  "PhantomX":   { type:"Red Team Framework", desc:"Unified Python CLI covering recon through post-exploitation with zero external dependencies. Built for authorized assessments on Kali Linux.", pros:["22 modules in one tool","Zero external pip dependencies","HTML dashboard + risk scoring","CI/CD tested codebase","Slack/Discord alerting"], cons:["Newer project — smaller community","No active exploit database","GUI is local-only"] },
+  "Metasploit": { type:"Exploit Framework",  desc:"Industry-standard exploit framework with thousands of modules, payloads, and post-exploitation capabilities. Used in professional engagements.", pros:["Largest exploit database","Meterpreter shell","Extensive post-exploitation","Active community"], cons:["Heavy resource usage","Requires expertise","Ruby-based (slower)","Expensive Pro version"] },
+  "BloodHound": { type:"AD Attack Path",     desc:"Active Directory attack path visualization tool using graph theory to identify privilege escalation paths in Windows environments.", pros:["Unrivalled AD path analysis","Graph visualisation","SharpHound collector","Free and open source"], cons:["Windows/AD only","Requires domain credentials","No web/network testing","Neo4j dependency"] },
+  "Nmap":       { type:"Port Scanner",       desc:"The definitive network discovery and port scanning tool. Backbone of most pen test toolkits for host and service discovery.", pros:["Fastest port scanner","NSE scripting engine","Widely supported","Passive fingerprinting"], cons:["No web app testing","No credentials analysis","Output requires post-processing","Limited reporting"] },
+  "Burp Suite": { type:"Web Proxy",          desc:"Professional web application security testing platform. The gold standard for manual and automated web app pen testing.", pros:["Unrivalled web app testing","Excellent proxy intercept","BApp store extensions","Active scan engine"], cons:["Expensive Pro license ($449/yr)","Web only — no network","Java memory intensive","No AD / infra testing"] },
+  "Nessus":     { type:"Vuln Scanner",       desc:"Commercial vulnerability scanner used by enterprises. Comprehensive CVE database and compliance checks but expensive at scale.", pros:["Largest CVE database","Compliance templates","Excellent credentialed scan","Plugin ecosystem"], cons:["Very expensive ($3000+/yr)","Closed source","Slow scan speeds","No manual testing support"] },
+  "Wireshark":  { type:"Packet Analyser",    desc:"The world's foremost network protocol analyser. Essential for traffic analysis, protocol debugging, and credential capture in cleartext.", pros:["Deep protocol dissection","Live capture + pcap","Powerful display filters","Free and open source"], cons:["Manual analysis required","No scanning capability","No exploitation features","Steep learning curve"] },
+  "Impacket":   { type:"Protocol Library",   desc:"Python library implementing network protocols for offensive security. Powers many AD attack tools like secretsdump and psexec.", pros:["AD attack toolkit","Pure Python","secretsdump / psexec","Kerberos attacks"], cons:["Requires credential input","Command-line only","No web testing","No integrated reporting"] },
+  "Enum4Linux": { type:"SMB Enumerator",     desc:"Linux alternative to enum.exe for SMB/Samba enumeration. Focused single-purpose tool for extracting information from Windows hosts.", pros:["Simple SMB enumeration","User/share/policy enum","Free and lightweight","RID cycling"], cons:["SMB only","Outdated codebase","No active development","No reporting"] },
+  "Nikto":      { type:"Web Scanner",        desc:"Open source web server scanner performing comprehensive tests against web servers for dangerous files, outdated software, and misconfigurations.", pros:["Fast web scanner","1000s of checks","Free and open source","Good for quick audits"], cons:["Very noisy (detected easily)","Web only","High false-positive rate","No modern API testing"] },
+};
+
+// ── Render ────────────────────────────────────────────────────────────────────
+const SEV = {
+  full:    { icon:"●", label:"Full",    cls:"full"    },
+  partial: { icon:"◐", label:"Partial", cls:"partial" },
+  no:      { icon:"○", label:"—",       cls:"no"      },
+  unique:  { icon:"★", label:"Unique",  cls:"unique"  },
+};
+
+function scoreTools(rows) {
+  const scores = new Array(10).fill(0);
+  const counts = new Array(10).fill(0);
+  for (const row of rows) {
+    if (row.cat || !row.vals) continue;
+    row.vals.forEach((v, i) => {
+      counts[i]++;
+      if (v === "unique") scores[i] += 2;
+      else if (v === "full") scores[i] += 1;
+      else if (v === "partial") scores[i] += 0.5;
+    });
+  }
+  return scores.map((s, i) => Math.round((s / (counts[i] || 1)) * 50));
+}
+
+function buildTable() {
+  const tbody = document.getElementById("table-body");
+  const scores = scoreTools(ROWS);
+
+  for (const row of ROWS) {
+    const tr = document.createElement("tr");
+    if (row.cat) {
+      tr.className = "category-row";
+      tr.innerHTML = `<td colspan="11">${row.cat}</td>`;
+    } else {
+      tr.className = "feature-row";
+      let html = `<td>${row.label}</td>`;
+      row.vals.forEach((v, i) => {
+        const s = SEV[v] || SEV.no;
+        const extra = i === 0 ? " phantomx-td" : "";
+        html += `<td class="${extra}"><div class="cell ${s.cls}"><span class="cell-icon">${s.icon}</span>${s.label}</div></td>`;
+      });
+      tr.innerHTML = html;
+    }
+    tbody.appendChild(tr);
+  }
+
+  // Score row
+  const scoreColors = {
+    0: "#ccc", 1: "#ccc", 2: "#ccc", 3: "#ffd166",
+    4: "#ffd166", 5: "#ffd166", 6: "#06d6a0", 7: "#06d6a0",
+    8: "#06d6a0", 9: "#e63030", 10: "#e63030"
+  };
+  const tr = document.createElement("tr");
+  tr.className = "score-row";
+  let html = `<td>CAPABILITY SCORE</td>`;
+  scores.forEach((s, i) => {
+    const pct = s;
+    const col = i === 0 ? "#e63030" : (pct >= 70 ? "#06d6a0" : pct >= 40 ? "#ffd166" : "#ccc");
+    const extra = i === 0 ? " phantomx-td" : "";
+    html += `<td class="${extra}"><div class="score-bar-wrap">
+      <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${col}"></div></div>
+      <span class="score-num">${pct}%</span>
+    </div></td>`;
+  });
+  tr.innerHTML = html;
+  tbody.appendChild(tr);
+}
+
+function buildCards() {
+  const grid = document.getElementById("summary-grid");
+  for (const [name, info] of Object.entries(TOOL_INFO)) {
+    const card = document.createElement("div");
+    card.className = "sum-card";
+    const accentColor = name === "PhantomX" ? "#e63030" : "#0a0a0a";
+    card.innerHTML = `
+      <div class="sum-card-head" style="background:${accentColor}">
+        <div class="tool-name">${name}</div>
+        <div class="tool-badge">${info.type}</div>
+      </div>
+      <div class="sum-card-body">
+        <p>${info.desc}</p>
+        <ul class="sum-card-strengths">
+          ${info.pros.map(p => `<li><span class="plus">+</span>${p}</li>`).join("")}
+          ${info.cons.map(c => `<li><span class="minus">−</span>${c}</li>`).join("")}
+        </ul>
+      </div>`;
+    grid.appendChild(card);
+  }
+}
+
+// Init
+document.getElementById("date-stamp").textContent = new Date().toLocaleDateString("en-GB", { day:"2-digit", month:"long", year:"numeric" });
+buildTable();
+buildCards();
+</script>
+</body>
+</html>

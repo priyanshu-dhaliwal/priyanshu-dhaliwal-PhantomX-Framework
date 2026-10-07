@@ -1,5 +1,7 @@
-# priyanshu-dhaliwal-PhantomX-Framework
-PhantomX — Advanced Security Assessment Framework
+# ⚔️ PhantomX — Advanced Security Assessment Framework
+
+<div align="center">
+
 ```
 ██████╗ ██╗  ██╗ █████╗ ███╗   ██╗████████╗ ██████╗ ███╗   ███╗██╗  ██╗
 ██╔══██╗██║  ██║██╔══██╗████╗  ██║╚══██╔══╝██╔═══██╗████╗ ████║╚██╗██╔╝
@@ -691,6 +693,43 @@ PhantomX/
 
 ---
 
+## 🚀 GitHub Deployment
+
+```bash
+# 1. Install git and configure
+sudo apt install git -y
+git config --global user.name  "Your Name"
+git config --global user.email "you@example.com"
+
+# 2. Generate SSH key and add to github.com/settings/keys
+ssh-keygen -t ed25519 -C "you@example.com"
+cat ~/.ssh/id_ed25519.pub
+
+# 3. Create repo at github.com/new (no README, no .gitignore)
+
+# 4. Push
+cd ~/Desktop/PhantomX
+git init
+git branch -M main
+git remote add origin https://github.com/priyanshu-dhaliwal/priyanshu-dhaliwal-PhantomX-Framework.git
+git add .
+git commit -m "Initial commit — PhantomX v6.0"
+git push -u origin main
+```
+
+**Common push errors:**
+
+| Error | Fix |
+|-------|-----|
+| `Permission denied (publickey)` | Add SSH key to GitHub settings |
+| `Repository not found` | Check username in remote URL: `git remote -v` |
+| `Updates were rejected` | Run `git pull origin main --allow-unrelated-histories` first |
+| `src refspec main does not match` | Make a commit first: `git add . && git commit -m "init"` |
+
+See `GITHUB_DEPLOY.md` for the complete deployment guide with every error and fix.
+
+---
+
 ## ⚠️ Legal Disclaimer
 
 This tool is provided for **authorized security assessment and educational purposes only.**
@@ -704,3 +743,11 @@ This tool is provided for **authorized security assessment and educational purpo
   - And equivalent laws in all other jurisdictions
 - The authors accept **no liability** for unauthorized or illegal use
 
+---
+
+<div align="center">
+
+*PhantomX v6.0 — Built with Python 3 · Zero external dependencies*
+*22 modules · 62 tests · For authorized security assessment only*
+
+</div>

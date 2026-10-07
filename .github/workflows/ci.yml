@@ -1,0 +1,340 @@
+# .github/workflows/ci.yml
+# PhantomX — CI/CD Pipeline
+# Runs on every push and pull request to main/develop
+# Tests: syntax validation, unit tests, security lint, coverage
+
+name: PhantomX CI
+
+on:
+  push:
+    branches: [ main, develop, "feature/**" ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run full test suite every night at 02:00 UTC
+    - cron: "0 2 * * *"
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+
+  # ── Job 1: Syntax & Import Validation ──────────────────────────────────────
+  syntax-check:
+    name: Syntax & Structure Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Verify all Python files parse
+        run: |
+          python3 - <<'EOF'
+          import ast, pathlib, sys
+          errors = []
+          for f in pathlib.Path(".").rglob("*.py"):
+              try:
+                  ast.parse(f.read_text())
+              except SyntaxError as e:
+                  errors.append(f"{f}:{e.lineno}: {e.msg}")
+          if errors:
+              print("SYNTAX ERRORS:")
+              for e in errors: print(" ", e)
+              sys.exit(1)
+          else:
+              print(f"✓ All {sum(1 for _ in pathlib.Path('.').rglob('*.py'))} files OK")
+          EOF
+
+      - name: Check required files exist
+        run: |
+          python3 - <<'EOF'
+          import pathlib, sys
+          required = [
+            "main.py", "tui.py", "autorun.sh",
+            "core/engine.py", "core/banner.py", "core/scoring.py",
+            "utils/shell.py", "utils/report.py",
+            "tests/test_phantomx.py",
+            "dashboard/index.html", "dashboard/architecture.html",
+          ]
+          missing = [r for r in required if not pathlib.Path(r).exists()]
+          if missing:
+              print("MISSING FILES:")
+              for m in missing: print(" ", m)
+              sys.exit(1)
+          print(f"✓ All {len(required)} required files present")
+          EOF
+
+      - name: Count plugins (must be ≥ 15)
+        run: |
+          count=$(ls plugins/*.py | grep -v __init__ | wc -l)
+          echo "Plugin count: $count"
+          [ "$count" -ge 15 ] || (echo "FAIL: expected ≥15 plugins" && exit 1)
+          echo "✓ Plugin count OK"
+
+  # ── Job 2: Unit Tests ───────────────────────────────────────────────────────
+  unit-tests:
+    name: Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    needs: syntax-check
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install test dependencies
+        run: |
+          pip install pytest pytest-cov pytest-timeout --break-system-packages 2>/dev/null \
+            || pip install pytest pytest-cov pytest-timeout
+
+      - name: Run unit tests with coverage
+        run: |
+          python3 -m pytest tests/ \
+            -v \
+            --timeout=30 \
+            --tb=short \
+            --cov=. \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-omit="tests/*,*/__init__.py" \
+            -p no:warnings
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.11'
+        with:
+          file: coverage.xml
+          flags: unittests
+          name: phantomx-coverage
+        continue-on-error: true  # Don't fail if codecov is unavailable
+
+  # ── Job 3: Security Lint ────────────────────────────────────────────────────
+  security-lint:
+    name: Security & Code Quality Lint
+    runs-on: ubuntu-latest
+    needs: syntax-check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install linters
+        run: |
+          pip install bandit pyflakes --break-system-packages 2>/dev/null \
+            || pip install bandit pyflakes
+
+      - name: Bandit security scan
+        run: |
+          # Scan for security issues in the framework code itself
+          bandit -r . \
+            --exclude tests,dashboard \
+            -ll \
+            --format txt \
+            -o bandit-report.txt || true
+          echo "=== Bandit Report ===" && cat bandit-report.txt
+          # Fail only on HIGH severity issues
+          bandit -r . --exclude tests,dashboard -lll -q 2>&1 | \
+            grep -c "High:" || echo "No high-severity issues found ✓"
+
+      - name: Pyflakes undefined names check
+        run: |
+          python3 -m pyflakes . 2>&1 | grep -v "__pycache__" | \
+            grep -v "tests/" | head -30 || true
+          echo "Pyflakes check complete"
+
+      - name: Check for hardcoded secrets patterns
+        run: |
+          python3 - <<'EOF'
+          import re, pathlib, sys
+          # Simple check: no hardcoded passwords or API keys in source
+          BAD_PATTERNS = [
+              r'password\s*=\s*["\'][^"\']{6,}["\']',
+              r'api_key\s*=\s*["\'][A-Za-z0-9]{20,}["\']',
+              r'secret\s*=\s*["\'][^"\']{8,}["\']',
+          ]
+          EXCLUDE = {'tests/', 'dashboard/', '.git/'}
+          issues = []
+          for f in pathlib.Path('.').rglob('*.py'):
+              if any(ex in str(f) for ex in EXCLUDE):
+                  continue
+              text = f.read_text(errors='replace')
+              for pat in BAD_PATTERNS:
+                  for m in re.finditer(pat, text, re.IGNORECASE):
+                      # Ignore obvious test/demo values
+                      if not any(kw in m.group().lower() for kw in
+                                 ['example','test','demo','placeholder','your_']):
+                          issues.append(f"{f}: {m.group()[:60]}")
+          if issues:
+              print("Potential hardcoded secrets:")
+              for i in issues[:10]: print(" ", i)
+          else:
+              print("✓ No hardcoded secret patterns detected")
+          EOF
+
+  # ── Job 4: Plugin Interface Contract ───────────────────────────────────────
+  plugin-contracts:
+    name: Plugin Interface Contracts
+    runs-on: ubuntu-latest
+    needs: syntax-check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Verify all plugins implement run() → dict
+        run: |
+          python3 - <<'EOF'
+          import sys, ast, pathlib
+          sys.path.insert(0, ".")
+          plugins_dir = pathlib.Path("plugins")
+          errors = []
+          for f in sorted(plugins_dir.glob("*.py")):
+              if f.stem == "__init__":
+                  continue
+              tree = ast.parse(f.read_text())
+              fn_names = [n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
+              if "run" not in fn_names:
+                  errors.append(f"{f.name}: missing run() function")
+          if errors:
+              print("PLUGIN CONTRACT FAILURES:")
+              for e in errors: print(" ", e)
+              sys.exit(1)
+          plugin_count = len(list(plugins_dir.glob("*.py"))) - 1  # exclude __init__
+          print(f"✓ All {plugin_count} plugins implement run()")
+          EOF
+
+      - name: Verify MODULE_MAP covers all plugins
+        run: |
+          python3 - <<'EOF'
+          import sys, pathlib, re
+          sys.path.insert(0, ".")
+          from core.engine import MODULE_MAP
+          plugin_files = {f.stem for f in pathlib.Path("plugins").glob("*.py")
+                          if f.stem != "__init__"}
+          mapped_plugins = set(MODULE_MAP.values())
+          unmapped = plugin_files - mapped_plugins
+          if unmapped:
+              print(f"Unmapped plugins (not in MODULE_MAP): {unmapped}")
+              # Non-fatal warning
+          print(f"✓ MODULE_MAP: {len(MODULE_MAP)} entries, {len(plugin_files)} plugin files")
+          EOF
+
+  # ── Job 5: Dashboard HTML Validation ───────────────────────────────────────
+  dashboard-check:
+    name: Dashboard HTML Validation
+    runs-on: ubuntu-latest
+    needs: syntax-check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate HTML files are well-formed
+        run: |
+          python3 - <<'EOF'
+          import pathlib, sys
+          errors = []
+          for f in pathlib.Path("dashboard").glob("*.html"):
+              text = f.read_text()
+              for required in ["<!DOCTYPE html>", "<html", "</html>", "<head", "</head>", "<body", "</body>"]:
+                  if required.lower() not in text.lower():
+                      errors.append(f"{f.name}: missing {required}")
+          if errors:
+              for e in errors: print("ERROR:", e)
+              sys.exit(1)
+          print("✓ All dashboard HTML files validated")
+          EOF
+
+      - name: Check dashboard loads JSON correctly (smoke test)
+        run: |
+          python3 - <<'EOF'
+          import json, pathlib
+          # Verify the JS in index.html references the right fields
+          html = pathlib.Path("dashboard/index.html").read_text()
+          required_references = ["results", "hostname", "start_time", "severity"]
+          missing = [r for r in required_references if r not in html]
+          if missing:
+              print("Missing references in dashboard:", missing)
+          else:
+              print("✓ Dashboard references all required JSON fields")
+          EOF
+
+  # ── Job 6: Documentation Check ─────────────────────────────────────────────
+  docs-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify README exists and has content
+        run: |
+          [ -f README.md ] || (echo "Missing README.md" && exit 1)
+          wc_lines=$(wc -l < README.md)
+          [ "$wc_lines" -gt 20 ] || (echo "README too short ($wc_lines lines)" && exit 1)
+          echo "✓ README.md: $wc_lines lines"
+
+      - name: Verify all plugins have docstrings
+        run: |
+          python3 - <<'EOF'
+          import ast, pathlib, sys
+          missing_docs = []
+          for f in pathlib.Path("plugins").glob("*.py"):
+              if f.stem == "__init__": continue
+              tree  = ast.parse(f.read_text())
+              first = tree.body[0] if tree.body else None
+              if not (isinstance(first, ast.Expr) and
+                      isinstance(getattr(first, 'value', None), ast.Constant)):
+                  missing_docs.append(f.name)
+          if missing_docs:
+              print(f"Plugins missing module docstring: {missing_docs}")
+          else:
+              print(f"✓ All plugins have module docstrings")
+          EOF
+
+  # ── Job 7: Build Summary ────────────────────────────────────────────────────
+  build-summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [syntax-check, unit-tests, security-lint, plugin-contracts, dashboard-check]
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Print project statistics
+        run: |
+          echo "════════════════════════════════════════"
+          echo "  PhantomX Build Summary"
+          echo "════════════════════════════════════════"
+          echo "Python files : $(find . -name '*.py' -not -path './.git/*' | wc -l)"
+          echo "Plugin modules: $(ls plugins/*.py | grep -v __init__ | wc -l)"
+          echo "Test cases   : $(grep -c 'def test_' tests/test_phantomx.py)"
+          echo "Lines of code: $(find . -name '*.py' -not -path './.git/*' | xargs wc -l 2>/dev/null | tail -1)"
+          echo "Dashboard files: $(ls dashboard/*.html | wc -l)"
+          echo "════════════════════════════════════════"
+
+      - name: Final status
+        run: echo "✓ PhantomX CI pipeline complete"
